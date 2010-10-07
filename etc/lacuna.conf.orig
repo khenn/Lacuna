@@ -1,0 +1,9 @@
+# config-file-type: JSON 1
+
+{
+   "dsn" : "DBI:mysql:YOUR_TABLE;host=localhost;port=3306",
+   "dbuser" : "USERNAME",
+   "dbpass" : "PASSWORD",
+   "server" : "https://SERVER.lacunaexpanse.com",
+   "apikey" : "YOUR_API_KEY"
+}

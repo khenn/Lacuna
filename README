@@ -1,0 +1,20 @@
+To use this API you will need the following:
+
+Perl 5.10 or higher
+Moose
+Module::Find
+JSON::RPC::Common::Marshal::HTTP
+LWP::UserAgent
+Config::JSON
+Modern::Perl
+DateTime
+DateTime::Format::SQLite
+DBI
+DBD::mysql
+
+
+Unzip this archive to any folder you choose.
+
+You will need a mysql database running
+Run the lacuna.sql script found in thd docs/ directory
+Example scripts can be found in <lacuna_root>/sbin
