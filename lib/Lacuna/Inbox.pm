@@ -5,32 +5,15 @@ package Lacuna::Inbox;
 =cut
 
 use Moose;
+use Modern::Perl;
+extends ('Lacuna::WSWrapper');
 
 use Data::Dumper;
 
-has 'session'    => (
-    is        => 'ro',
-    isa       => 'Lacuna::Session',
-    predicate => 'has_session'
-);
-
-has 'url'     => (
-    is        => 'ro',
-    isa       => 'Str',
-    default   => '/inbox'
-);
-
-
-around BUILDARGS => sub {
-    my $orig          = shift;
-    my $class         = shift;
-
-    my $session       = shift;
-
-    return $class->$orig( session => $session );
-    
-};
-
+sub BUILD {
+    my $self    = shift;
+    $self->url("/inbox");
+}
 
 #--------------------------------------------------------------------
 #                   Public Methods
@@ -39,7 +22,9 @@ around BUILDARGS => sub {
 #-----------------------------------------------
 =head2 send_message(recipients,subject,body)
 
-Send a message to the account passed in
+Send a message to the account passed in.  This is also a pass through method.
+If the first argument is an Array reference it will call the web service method
+send_message using the data contained in the .
 
 =head3 recipients
 
@@ -62,19 +47,22 @@ sub send_message {
     my $subject    = shift;
     my $body       = shift;
 
-    my $req_obj  = $session->callLacuna($self->url,"send_message",[
-        $session->session_id,
-        $recipients,
-        $subject,
-        $body
-    ]);
+    my $params     = [];
+    if( ref $recipients eq "ARRAY") {
+        $params = $recipients;
+    }
+    else {
+        push(@$params,$session->session_id,$recipients,$subject,$body);
+    }
+
+    my $req_obj  = $session->callLacuna($self->url,"send_message",$params);
 
     if($req_obj->error) {
         print "Could not send meesage to $recipients: ".$req_obj->error->message." (".$req_obj->error->code.")\n";
-        return 0;
+        return undef;
     }
 
-    return 1;
+    return $req_obj->result;
 }
 
 #--------------------------------------------------------------------

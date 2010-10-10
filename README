@@ -9,6 +9,7 @@ Config::JSON
 Modern::Perl
 DateTime
 DateTime::Format::SQLite
+Try::Tiny
 DBI
 DBD::mysql
 
@@ -17,4 +18,37 @@ Unzip this archive to any folder you choose.
 
 You will need a mysql database running
 Run the lacuna.sql script found in thd docs/ directory
+TO DO: Remove mysql dependency in favor of some sort of persistant file storage.
+
+Patches welcome!
+
 Example scripts can be found in <lacuna_root>/sbin
+
+The web service API is now entirely wrapped and matching methods do not need
+to be added in order to call the API.  You simple create a session:
+
+$session = Lacuna::Session->new($configFile,$username,$password);
+
+Then you can call methods directly against the web service API which can be found here:
+
+https://us1.lacunaexpanse.com/api
+
+For instance, Lacuna::Empire is a wrapper for the following API:
+
+https://us1.lacunaexpanse.com/api/Empire.html
+
+You can call methods directly from this API by calling the method as listed
+and passing the params as an array reference:
+
+$empire  = Lacuna::Empire->new($session);
+$result  = $empire->get_status([$session->session_id]);
+$result  = $empire->is_name_available(["Empire Name"] );
+
+Any new methods added to Lacuna's Empire API become instantly available
+in this fashion without the need to add supporting wrapper methods.
+
+
+NOTE:  There may still be some individual building methods that are not properly
+updated to support calling them directly from the web services API.  I will
+spend some time next weekend fixing the methods so they are all available
+via Lacuna's normal web service method as documented

@@ -6,14 +6,9 @@ package Lacuna::Building;
 
 use Moose;
 use Modern::Perl;
+extends ('Lacuna::WSWrapper');
 
 use Data::Dumper;
-
-has 'session'    => (
-    is        => 'ro',
-    isa       => 'Lacuna::Session',
-    predicate => 'has_session'
-);
 
 has 'planet'     => (
     is        => 'ro',
@@ -43,12 +38,6 @@ has 'level' => (
     is        => 'ro',
     isa       => 'Int',
     predicate => 'has_level',
-);
-
-has 'url' => (
-    is        => 'ro',
-    isa       => 'Str',
-    predicate => 'has_url',
 );
 
 has 'x' => (

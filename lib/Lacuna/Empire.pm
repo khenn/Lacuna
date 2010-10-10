@@ -6,30 +6,14 @@ package Lacuna::Empire;
 
 use Moose;
 use Modern::Perl;
+extends ('Lacuna::WSWrapper');
 
 use Data::Dumper;
 
-has 'session'    => (
-    is        => 'ro',
-    isa       => 'Lacuna::Session',
-    predicate => 'has_session'
-);
-
-has 'url'     => (
-    is        => 'ro',
-    isa       => 'Str',
-    default   => '/empire'
-);
-
-around BUILDARGS => sub {
-    my $orig          = shift;
-    my $class         = shift;
-
-    my $session       = shift;
-
-    return $class->$orig( session => $session );
-    
-};
+sub BUILD {
+    my $self    = shift;
+    $self->url("/empire");
+}
 
 
 #--------------------------------------------------------------------
@@ -56,27 +40,37 @@ sub get_planet_by_name {
 }
 
 #-----------------------------------------------
-=head2 view_public_data( empire_id )
+=head2 view_public_profile ( [ empire_id ] )
 
-View public data for the empire_id passed in
+Helper method for retrieving public profile. This is also a pass through method.
+If the first argument is an Array reference it will call the web service method
+view_public_profile using the data contained in the .
+
+=head3 empire_id
+
+Empire to get public profile for. If no ID is passed in, public profile
+is returned for the current
 
 =cut
 
-sub view_public_data {
+sub view_public_profile {
     my $self       = shift;
     my $session    = $self->session;
-    my $empire_id  = shift;
+    my $empire_id  = shift || $session->{session}->{empire}->{id};
 
-    #( session_id, [ sort_by, page_number ] )
+    my $params     = [];
+    if( ref $empire_id eq "ARRAY") {
+        $params = $empire_id;
+    }
+    else {
+        push(@$params,$session->session_id,$empire_id);
+    }
 
-    my $req_obj  = $session->callLacuna($self->url,"view_public_profile",[
-        $session->session_id,
-        $empire_id
-    ]);
+    my $req_obj  = $session->callLacuna($self->url,"view_public_profile",$params);
 
     if($req_obj->error) {
         print "Could not get empire stats: ".$req_obj->error->message." (".$req_obj->error->code.")\n";
-        return 0;
+        return undef;
     }
 
     return $req_obj->result;

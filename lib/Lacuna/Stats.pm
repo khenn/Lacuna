@@ -6,20 +6,9 @@ package Lacuna::Stats;
 
 use Moose;
 use Modern::Perl;
+extends ('Lacuna::WSWrapper');
 
 use Data::Dumper;
-
-has 'session'    => (
-    is        => 'ro',
-    isa       => 'Lacuna::Session',
-    predicate => 'has_session'
-);
-
-has 'url'     => (
-    is        => 'ro',
-    isa       => 'Str',
-    default   => '/stats'
-);
 
 has 'total_empires' => (
     is        => 'rw',
@@ -56,25 +45,19 @@ has 'DIRTIEST' => (
     default => 'dirtiest_rank'
 );
 
-around BUILDARGS => sub {
-    my $orig          = shift;
-    my $class         = shift;
-
-    my $session       = shift;
-
-    return $class->$orig( session => $session );
-    
-};
-
+sub BUILD {
+    my $self    = shift;
+    $self->url("/stats");
+}
 
 #--------------------------------------------------------------------
 #                   Public Methods
 #--------------------------------------------------------------------
 
 #-----------------------------------------------
-=head2 get_empire_stats()
+=head2 get_total_empires()
 
-Send a message to the account passed in
+Gets the total number of empires in the expanse.
 
 =cut
 
@@ -87,9 +70,14 @@ sub get_total_empires {
 }
 
 #-----------------------------------------------
-=head2 get_empire_stats()
+=head2 get_empire_stats( [ page ] )
 
-Send a message to the account passed in
+Quick method to get empire_size_rank stats for the server
+
+=head3 page
+
+Optional page number to get stats for.  If no page number is passed in
+the first page of stats will be returned.
 
 =cut
 
@@ -98,22 +86,15 @@ sub get_empire_stats {
     my $session    = $self->session;
     my $page       = shift || 1;
 
-    #( session_id, [ sort_by, page_number ] )
-
-    my $req_obj  = $session->callLacuna($self->url,"empire_rank",[
+    my $result     = $self->empire_rank([
         $session->session_id,
         $self->EMPIRE,
         $page
     ]);
 
-    if($req_obj->error) {
-        print "Could not get empire stats: ".$req_obj->error->message." (".$req_obj->error->code.")\n";
-        return [];
-    }
+    $self->total_empires($result->{total_empires});
 
-    $self->total_empires($req_obj->result->{total_empires});
-
-    return $req_obj->result->{empires};
+    return $result->{empires};
 }
 
 #--------------------------------------------------------------------

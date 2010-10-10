@@ -9,14 +9,9 @@ use Moose;
 use Lacuna::Building;
 use Module::Find;
 use Modern::Perl;
+extends ('Lacuna::WSWrapper');
 
 use Data::Dumper;
-
-has 'session'    => (
-    is        => 'ro',
-    isa       => 'Lacuna::Session',
-    predicate => 'has_session'
-);
 
 has 'planet_data'    => (
     is      => 'ro',
@@ -26,12 +21,6 @@ has 'planet_data'    => (
 has 'planet_id' => (
     is      => 'ro',
     isa     => 'Str',
-);
-
-has 'url' => (
-    is      => 'ro',
-    isa     => 'Str',
-    default => '/body'
 );
 
 has 'x' => (
@@ -118,7 +107,6 @@ has 'happiness_hour'    => ( is => 'ro', isa => 'Int' );
 has 'happiness'         => ( is => 'ro', isa => 'Int' );
 
 
-
 around BUILDARGS => sub {
     my $orig          = shift;
     my $class         = shift;
@@ -141,6 +129,7 @@ around BUILDARGS => sub {
         type          => $planet_data->{type},
         ore           => $planet_data->{ore},
         empire        => $planet_data->{empire} || {},
+        url           => "/body",
     );
 
     my $int_fields = [
